@@ -1,0 +1,25 @@
+Anki 26.09.4 (c06370ff) (ao)
+Python 3.13.17 Qt 6.11.2 PyQt 6.11.0
+Platform: Windows-11-10.0.26200-SP0
+
+Traceback (most recent call last):
+  File "C:\Users\Sri Ram\AppData\Roaming\Anki2\addons21\auto_anki_plugin\__init__.py", line 108, in handle_event
+    open_window()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Sri Ram\AppData\Roaming\Anki2\addons21\auto_anki_plugin\__init__.py", line 116, in open_window
+    window = Gui()
+  File "C:\Users\Sri Ram\AppData\Roaming\Anki2\addons21\auto_anki_plugin\__init__.py", line 28, in __init__
+    self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Qt' has no attribute 'WindowStaysOnTopHint'
+
+===Add-ons (active)===
+(add-on provided name [Add-on folder, installed at, version, is config changed])
+'' ['auto_anki_plugin', 0, 'None', '']
+
+===IDs of active AnkiWeb add-ons===
+
+
+===Add-ons (inactive)===
+(add-on provided name [Add-on folder, installed at, version, is config changed])
+

@@ -1,0 +1,8 @@
+#separator:Pipe
+#html:true
+#notetype:Basic
+#deck:Test
+#tags:Networking Protocols
+
+What is TCP?|Transmission Control Protocol
+What is UDP?|<img src="test.png">
