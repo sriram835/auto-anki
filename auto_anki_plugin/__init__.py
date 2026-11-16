@@ -20,24 +20,39 @@ width = geometry.width()
 height = geometry.height()
 
 class Gui(QWidget):
-    def __init__(self):
+    def __init__(self, anki_manager):
         super().__init__()
+
+        self.anki_manager = anki_manager
+
         self.setWindowTitle("Auto Anki Plugin")
         self.resize(width, height//10)
-        self.move(0,0)
-        self.setWindowFlags((Qt.WindowType.WindowStaysOnTopHint))
+        self.move(0, 0)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
 
         # Create widgets
         self.deck_dropdown = QComboBox()
         self.deck_dropdown.addItems(mw.col.decks.all_names())
-        
+
         self.add_front_text_btn = QPushButton("Add Front Text")
-
         self.add_back_text_btn = QPushButton("Add Back Text")
-
         self.add_card_btn = QPushButton("Add Card")
 
+        # Connect buttons
+        qconnect(
+            self.add_front_text_btn.clicked,
+            self.on_add_front
+        )
 
+        qconnect(
+            self.add_back_text_btn.clicked,
+            self.on_add_back
+        )
+
+        qconnect(
+            self.add_card_btn.clicked,
+            self.on_add_card
+        )
 
         # Layout
         layout = QHBoxLayout()
@@ -46,9 +61,19 @@ class Gui(QWidget):
         layout.addWidget(self.add_back_text_btn)
         layout.addWidget(self.add_card_btn)
 
-
         self.setLayout(layout)
-        
+
+    def on_add_front(self):
+        self.anki_manager.add_front("Example front")
+
+    def on_add_back(self):
+        self.anki_manager.add_back("Example back")
+
+    def on_add_card(self):
+        self.anki_manager.set_deck(self.deck_dropdown.currentText())
+        self.anki_manager.add_card()
+
+
 class AnkiManager:
     def __init__(self):
         self.front = []
@@ -57,22 +82,55 @@ class AnkiManager:
     def add_card(self):
         pass
 
-    def add_front(self, front):
+    def add_front(self, front, note_type): 
+       pass
+
+
+    def add_back(self, back, note_type):
         pass
 
-    def add_back(self, back):
+    def set_deck(self, deck_name):
         pass
 
 class AnkiManagerConcrete(AnkiManager):
+    def set_deck(self, deck_name):
+        deck_id = mw.col.decks.id(deck_name)
+        mw.col.decks.select(deck_id)
+
     def add_card(self):
-        # Implement the logic to add a card to Anki
-        pass
+        card = mw.col.newNote()
 
-    def add_front(self, front):
-        self.front.append(front)
+        if not self.front or not self.back:
+            return
 
-    def add_back(self, back):
-        self.back.append(back)
+        for i in range(len(self.front)):
+            front_text, front_note_type = self.front[i]
+            if (front_note_type == "TEXT"):
+                card["Front"] = f"{front_text}<br>"
+            if (front_note_type == "IMAGE"):
+                image_path = front_text
+                image_name = mw.col.media.add_file(image_path)
+                card["Front"] = f'<img src="{image_name}"><br>'
+
+
+        for i in range(len(self.back)):
+            back_text, back_note_type = self.back[i]
+            if (back_note_type == "TEXT"):
+                card["Back"] = f"{back_text}<br>"
+            if (back_note_type == "IMAGE"):
+                image_path = back_text
+                image_name = mw.col.media.add_file(image_path)
+                card["Back"] = f'<img src="{image_name}"><br>'
+
+        mw.col.addNote(card)
+        self.front.clear()
+        self.back.clear()   
+
+    def add_front(self, front, note_type):
+        self.front.append((front, note_type))
+
+    def add_back(self, back, note_type):
+        self.back.append((back, note_type))
 
 
 class EventListener(QObject):
@@ -113,7 +171,8 @@ def open_window():
     global window
 
     if window is None:
-        window = Gui()
+        anki_manager = AnkiManagerConcrete()
+        window = Gui(anki_manager)
 
     window.show()
     window.raise_()
